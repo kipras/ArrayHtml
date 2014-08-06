@@ -7,13 +7,13 @@
  * to expand/collapse each level. Supports printing recursive objects, i.e. objects that have children
  * that point back to the parent object.
  *
- * If a printed object has a __toArray() method - that method will be used to retrieve pretty-printed
- * data from the object, instead of get_object_vars()
+ * If a printed object has a `__toArray()` method - that method will be called and any additional data
+ * returned by it will be merged together with the data returned by `get_object_vars()` and pretty-printed.
  *
  * Requirements:
  *      PHP >= 5.3 (uses static:: keyword)
  *
- * @version 1.0
+ * @version 1.1
  */
 class ArrayHtml
 {
@@ -65,10 +65,9 @@ class ArrayHtml
         } else if (is_object($item)) {
             $debugItem['type'] = get_class($item);
             $debugItem['expands'] = TRUE;
+            $props = get_object_vars($item);
             if (method_exists($item, '__toArray')) {
-                $props = $item->__toArray();
-            } else {
-                $props = get_object_vars($item);
+                $props = array_merge($props, $item->__toArray());
             }
             foreach ($props as $name => $val) {
                 $debugItem['val']["->{$name}"] = static::_getArrayDebugData(
